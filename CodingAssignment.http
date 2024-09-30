@@ -1,0 +1,6 @@
+@CodingAssignment_HostAddress = http://localhost:5025
+
+GET {{CodingAssignment_HostAddress}}/bikeThefts/
+Accept: application/json
+
+###

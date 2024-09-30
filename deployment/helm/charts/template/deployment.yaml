@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "assignment.fullname" . }}
+  labels:
+    app: {{ include "assignment.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "assignment.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "assignment.name" . }}
+    spec:
+      containers:
+        - name: {{ include "assignment.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 80
