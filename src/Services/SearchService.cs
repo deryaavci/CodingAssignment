@@ -37,6 +37,8 @@ namespace CodingAssignment.src.Services
 
             if (searchParams.Stolenness == Stolenness.proximity)
             {
+                //TODO:On Kubernetes, it may not be possible to directly obtain the client IP address using HttpContextAccessor.
+                //The X-Forwarded-For header needs to be configured.
                 if (searchParams.Location == "IP")
                 {
                     searchParams.Location = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
