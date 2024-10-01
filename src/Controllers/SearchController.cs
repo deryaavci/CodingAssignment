@@ -10,11 +10,11 @@ namespace CodingAssignment.src.Controllers
     [Route("api/[controller]")]
     public class SearchController : ControllerBase
     {
-        private readonly ISearchService _bikeTheftService;
+        private readonly ISearchService _searchService;
 
-        public SearchController(ISearchService bikeTheftService)
+        public SearchController(ISearchService searchService)
         {
-            _bikeTheftService = bikeTheftService;
+            _searchService = _searchService;
         }
 
         [HttpGet]
@@ -23,14 +23,23 @@ namespace CodingAssignment.src.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> SearchCount([FromQuery] SearchParams searchParams)
         {
-            // location is provided if stolenness is 'proximity'
-            if (searchParams.Stolenness == Stolenness.proximity && string.IsNullOrWhiteSpace(searchParams.Location))
+            try
             {
-                return BadRequest("A valid location must be provided when stolenness is 'proximity'.");
+                // location is provided if stolenness is 'proximity'
+                if (searchParams.Stolenness == Stolenness.proximity && string.IsNullOrWhiteSpace(searchParams.Location))
+                {
+                    return BadRequest("A valid location must be provided when stolenness is 'proximity'.");
+                }
+
+                var result = await _searchService.SearchCount(searchParams);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                //logging
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An unexpected error occurred: " + ex.Message);
             }
 
-            var result = await _bikeTheftService.SearchCount(searchParams);
-            return Ok(result);
         }
     }
 }

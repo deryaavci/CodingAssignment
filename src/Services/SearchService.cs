@@ -3,7 +3,7 @@ using CodingAssignment.src.Models.GetBikeThefts;
 
 namespace CodingAssignment.src.Services
 {
-    public class SearchService: ISearchService
+    public class SearchService : ISearchService
     {
         private readonly HttpClient _httpClient;
         private readonly string _baseApiUrl;
@@ -18,12 +18,22 @@ namespace CodingAssignment.src.Services
 
         public async Task<string> SearchCount(SearchParams searchParams)
         {
-            var queryParams = BuildQueryParams(searchParams);
+            try
+            {
+                var queryParams = BuildQueryParams(searchParams);
 
-            string apiUrl = $"{_baseApiUrl}/search/count?" + string.Join("&", queryParams);
+                string apiUrl = $"{_baseApiUrl}/search/count?" + string.Join("&", queryParams);
 
-            var result = await _httpClient.GetStringAsync(apiUrl);
-            return result;
+                var result = await _httpClient.GetStringAsync(apiUrl);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                //logging
+                throw;
+            }
+
         }
 
         private List<string> BuildQueryParams(SearchParams searchParams)
