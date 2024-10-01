@@ -1,0 +1,41 @@
+name: assignment
+projectname: codingassignment
+
+magePullSecrets: []
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: assignment
+
+podLabels:
+  app: assignment
+
+service:
+  type: ClusterIP
+  port: 80
+
+ports:
+  - name: http
+    containerPort: 80
+    protocol: TCP
+
+probes:
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 150
+    periodSeconds: 45
+
+  readinessProbe:
+    httpGet:
+      path: /info
+      port: http
+    initialDelaySeconds: 150
+    periodSeconds: 45
+
+image:
+  repository: derya1123581321/assignment
+  tag: latest
+  pullPolicy: IfNotPresent
