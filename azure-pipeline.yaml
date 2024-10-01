@@ -1,37 +1,81 @@
+variables:
+  env: "dev"
+  projectName: "assignment"
+  dockerRegistryServiceConnection: "docker-hub-service-connection"
+  imageRepository: "derya1123581321/assignment"
+  dockerfilePath: "$(Build.SourcesDirectory)/Dockerfile"
+  tag: "$(Build.BuildNumber)"
+
 trigger:
   branches:
     include:
       - main
 
-pool:
-  vmImage: 'ubuntu-latest'
+stages:
+  - stage: "Build"
+    displayName: Build and push stage
+    jobs:
+      - job: Build
+        displayName: Build
+        steps:
+          - checkout: self
+          - task: Docker@2
+            displayName: Build the image
+            inputs:
+              containerRegistry: "$(dockerRegistryServiceConnection)"
+              repository: "$(imageRepository)"
+              command: "build"
+              Dockerfile: "$(dockerfilePath)"
+              buildContext: "$(Build.SourcesDirectory)"
+              tags: |
+                $(tag)
+                latest
+          - task: Docker@2
+            displayName: Push the image to container registry
+            inputs:
+              containerRegistry: "$(dockerRegistryServiceConnection)"
+              repository: "$(imageRepository)"
+              command: "push"
+              tags: |
+                $(tag)
+                latest
 
-steps:
-  - task: Docker@2
-    displayName: 'Build and Push Docker Image'
-    inputs:
-      containerRegistry: 'docker-hub-service-connection'
-      repository: 'derya1123581321/assignment'
-      command: 'buildAndPush'
-      Dockerfile: '**/Dockerfile'
-      tags: |
-        latest
+          - task: PublishTestResults@2
+            displayName: Publish Trivy Test Results
+            inputs:
+              testResultsFormat: "xUnit"
+              testResultsFiles: "**/xunit-report.xml"
+              mergeTestResults: true
+              failTaskOnFailedTests: false
+              testRunTitle: "Trivy - High and Critical Vulnerabilities"
+            condition: "always()"
 
-
-  - task: HelmInstaller@1
-    displayName: 'Install Helm'
-    inputs:
-      helmVersionToInstall: 'latest'
-
-
-  # - task: HelmDeploy@0
-  #   inputs:
-  #     azureSubscription: 'azure-subscription'
-  #     azureResourceGroup: 'resource-group'
-  #     kubernetesServiceEndpoint: 'kubernetes-service-endpoint'
-  #     namespace: 'default'
-  #     command: 'upgrade'
-  #     chartType: 'FilePath'
-  #     chartPath: './deployment/helm/charts'
-  #     releaseName: 'assignment-release'
-  #     overrideValues: 'image.repository=$(Build.Repository.Name)'
+  # - stage: "Deploy"
+  #   displayName: Deploy to Kubernetes
+  #   jobs:
+  #     - deployment: Assignment_Deployment
+  #       displayName: Deploy to Kubernetes
+  #       environment: "assignment-env"
+  #       strategy:
+  #         runOnce:
+  #           deploy:
+  #             steps:
+  #               - checkout: self
+  #               - task: HelmInstaller@1
+  #                 displayName: Install Helm
+  #                 inputs:
+  #                   helmVersionToInstall: "latest"
+  #               - task: HelmDeploy@0
+  #                 displayName: Deploy Helm chart
+  #                 inputs:
+  #                   azureSubscription: "azure-subscription"
+  #                   azureResourceGroup: "resource-group"
+  #                   kubernetesServiceEndpoint: "kubernetes-service-endpoint"
+  #                   namespace: "default"
+  #                   command: "upgrade"
+  #                   chartType: "FilePath"
+  #                   chartPath: "./deployment/helm/charts"
+  #                   releaseName: "assignment-release"
+  #                   overrideValues: "image.repository=$(Build.Repository.Name),image.tag=$(tag)"
+  #                   install: true
+  #                   waitForExecution: false
