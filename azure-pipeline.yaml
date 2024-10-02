@@ -50,32 +50,32 @@ stages:
               testRunTitle: "Trivy - High and Critical Vulnerabilities"
             condition: "always()"
 
-  # - stage: "Deploy"
-  #   displayName: Deploy to Kubernetes
-  #   jobs:
-  #     - deployment: Assignment_Deployment
-  #       displayName: Deploy to Kubernetes
-  #       environment: "assignment-env"
-  #       strategy:
-  #         runOnce:
-  #           deploy:
-  #             steps:
-  #               - checkout: self
-  #               - task: HelmInstaller@1
-  #                 displayName: Install Helm
-  #                 inputs:
-  #                   helmVersionToInstall: "latest"
-  #               - task: HelmDeploy@0
-  #                 displayName: Deploy Helm chart
-  #                 inputs:
-  #                   connectionType: "Kubernetes Service Connection"
-  #                   kubernetesServiceConnection: "kubernetes-service-connection"
-  #                   namespace: "default"
-  #                   command: "upgrade"
-  #                   chartType: "FilePath"
-  #                   chartPath: "./deployment/helm/charts"
-  #                   releaseName: "assignment-release"
-  #                   overrideValues: "image.repository=$(Build.Repository.Name),image.tag=$(tag)"
-  #                   valueFile: "./deployment/helm/values/dev-values.yaml"
-  #                   install: true
-  #                   waitForExecution: false
+  - stage: "Deploy"
+    displayName: Deploy to Kubernetes
+    jobs:
+      - deployment: Assignment_Deployment
+        displayName: Deploy to Kubernetes
+        environment: "assignment-env"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - task: HelmInstaller@1
+                  displayName: Install Helm
+                  inputs:
+                    helmVersionToInstall: "latest"
+                - task: HelmDeploy@0
+                  displayName: Deploy Helm chart
+                  inputs:
+                    connectionType: "Kubernetes Service Connection"
+                    kubernetesServiceConnection: "kubernetes-service-connection"
+                    namespace: "default"
+                    command: "upgrade"
+                    chartType: "FilePath"
+                    chartPath: "./deployment/helm/charts"
+                    releaseName: "assignment-release"
+                    overrideValues: "image.repository=$(Build.Repository.Name),image.tag=$(tag)"
+                    valueFile: "./deployment/helm/values/dev-values.yaml"
+                    install: true
+                    waitForExecution: false
